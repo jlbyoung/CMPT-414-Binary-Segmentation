@@ -1,7 +1,19 @@
+import torch
 import numpy as np
 import random
 from PIL import Image, ImageChops
 import matplotlib.pyplot as plt
+
+"""PyTorch"""
+
+def get_best_device():
+    if torch.cuda.is_available():
+        print(f"Running on the GPU: {torch.cuda.get_device_name()}")
+        return torch.device(f"cuda:{torch.cuda.current_device()}")
+    else:
+        print(f"Running on the CPU, certain tasks might run very slow")
+        return torch.cuda.device('cpu')
+
 
 """ Semantic Segementation """
 def decode_segmap(image, nc=21):
@@ -44,7 +56,7 @@ def random_colour_masks(image):
 
 
 def get_masks(pred, threshold=0.5):
-    pred_score = list(pred[0]['scores'].detach().numpy())
+    pred_score = list(pred[0]['scores'].detach().cpu().numpy())
     pred_t = [pred_score.index(x) for x in pred_score if x > threshold][-1]
 
     masks = (pred[0]['masks'] > 0.5).squeeze().detach().cpu().numpy()
