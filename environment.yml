@@ -1,0 +1,16 @@
+name: cv414
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - matplotlib=3.2.0
+  - numpy=1.18.1
+  - opencv=4.2.0
+  - pandas=1.0.1
+  - pillow=7.0.0
+  - tqdm=4.43.0
+# Install these manually as the installation is system specific
+# - pytorch=1.4.0
+# - torchvision=0.5.0
+  - jupyterlab=2.0.1

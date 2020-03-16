@@ -7,12 +7,31 @@ import matplotlib.pyplot as plt
 """PyTorch"""
 
 def get_best_device():
-    if torch.cuda.is_available():
+    # return torch.device('cpu')
+
+    # Uncomment when option to run on better GPU is available
+    if torch.cuda.is_available(): 
         print(f"Running on the GPU: {torch.cuda.get_device_name()}")
         return torch.device(f"cuda:{torch.cuda.current_device()}")
     else:
         print(f"Running on the CPU, certain tasks might run very slow")
-        return torch.cuda.device('cpu')
+        return torch.device('cpu')
+
+
+SMOOTH = 1e-6
+
+def iou_pytorch(outputs: torch.Tensor, labels: torch.Tensor):
+    # You can comment out this line if you are passing tensors of equal shape
+    # But if you are passing output from UNet or something it will most probably
+    # be with the BATCH x 1 x H x W shape
+    # outputs = outputs.squeeze(1)  # BATCH x 1 x H x W => BATCH x H x W
+    
+    intersection = (outputs & labels).float().sum((1, 2))  # Will be zero if Truth=0 or Prediction=0
+    union = (outputs | labels).float().sum((1, 2))         # Will be zero if both are 0
+    
+
+    iou = (intersection + SMOOTH) / (union + SMOOTH)  # We smooth our devision to avoid 0/0
+    return iou
 
 
 """ Semantic Segementation """
