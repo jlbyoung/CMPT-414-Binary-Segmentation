@@ -18,3 +18,22 @@ def top_k_acc(output, target, k=3):
         for i in range(k):
             correct += torch.sum(pred[:, i] == target).item()
     return correct / len(target)
+
+
+def meanIoU(output, target):
+    SMOOTH = 1e-6
+    output = output.argmax(dim=1)
+    output = output.to(torch.uint8)
+
+    target = (target * 255).squeeze(dim=1)
+    target = target.to(torch.uint8)
+
+
+    output = output.squeeze(dim=1)  # BATCH x 1 x H x W => BATCH x H x W
+    
+    intersection = (output & target).float().sum((1, 2))  # Will be zero if Truth=0 or Prediction=0
+    union = (output | target).float().sum((1, 2))         # Will be zero if both are 0
+    
+
+    iou = (intersection + SMOOTH) / (union + SMOOTH)  # We smooth our devision to avoid 0/0
+    return iou.mean().item()

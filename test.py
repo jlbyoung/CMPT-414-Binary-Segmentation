@@ -14,7 +14,7 @@ def main(config):
     # setup data_loader instances
     data_loader = getattr(module_data, config['data_loader']['type'])(
         config['data_loader']['args']['data_dir'],
-        batch_size=512,
+        batch_size=8,
         shuffle=False,
         validation_split=0.0,
         training=False,
@@ -37,7 +37,7 @@ def main(config):
     model.load_state_dict(state_dict)
 
     # prepare model for testing
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu') # torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     model.eval()
 
@@ -66,7 +66,6 @@ def main(config):
         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
     })
     logger.info(log)
-    input()
 
 
 if __name__ == '__main__':
