@@ -1,3 +1,6 @@
+# Sometimes the notebook may run into random issues, if that happens just run it again
+
+# Setup repository
 git init
 git remote add -t \* -f origin https://github.com/jlbyoung/CMPT-414-Rotoscoping.git
 git checkout investigate-loss-and-metrics # Replace with your branch here
