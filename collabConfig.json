@@ -10,10 +10,10 @@
         "type": "VOCDataLoader",
         "args":{
             "data_dir": "data/",
-            "batch_size": 16,
+            "batch_size": 8,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 8
+            "num_workers": 4
         }
     },
     "optimizer": {
@@ -40,12 +40,12 @@
         "epochs": 1,
 
         "save_dir": "saved/",
-        "save_period": 1,
+        "save_period": 10,
         "verbosity": 2,
         
         "monitor": "min val_loss",
         "early_stop": 10,
 
-        "tensorboard": true
+        "tensorboard": false
     }
 }

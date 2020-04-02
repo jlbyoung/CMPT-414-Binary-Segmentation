@@ -21,25 +21,25 @@ def transform_pipeline(image, mask):
 
     # Apply one by using elif for subsequent if statements
 
-    # Randomly change brightness
-    if random.random() > 0.5:
-        # Brightness factor with a range of (0.5, 1.5)
-        image = TF.adjust_brightness(image, random.random() + 0.5)
+    # # Randomly change brightness
+    # if random.random() > 0.5:
+    #     # Brightness factor with a range of (0.5, 1.5)
+    #     image = TF.adjust_brightness(image, random.random() + 0.5)
 
-    # Randomly change contrast
-    if random.random() > 0.5:
-        # Contrast factor with a range of (0.5, 2.0)
-        image = TF.adjust_contrast(image, random.randint(5, 20) / 10)
+    # # Randomly change contrast
+    # if random.random() > 0.5:
+    #     # Contrast factor with a range of (0.5, 2.0)
+    #     image = TF.adjust_contrast(image, random.randint(5, 20) / 10)
 
-    # Randomly change gamma
-    if random.random() > 0.5:
-        # Contrast factor with a range of (0.5, 1.5)
-        image = TF.adjust_gamma(image, random.random() + 0.5)
+    # # Randomly change gamma
+    # if random.random() > 0.5:
+    #     # Contrast factor with a range of (0.5, 1.5)
+    #     image = TF.adjust_gamma(image, random.random() + 0.5)
 
-    # Randomly change hue
-    if random.random() > 0.5:
-        # Contrast factor with a range of (-0.5, 0.5)
-        image = TF.adjust_hue(image, random.random() - 0.5)
+    # # Randomly change hue
+    # if random.random() > 0.5:
+    #     # Contrast factor with a range of (-0.5, 0.5)
+    #     image = TF.adjust_hue(image, random.random() - 0.5)
 
     # Random horizontal flipping
     if random.random() > 0.5:
