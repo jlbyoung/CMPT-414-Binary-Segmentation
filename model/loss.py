@@ -13,11 +13,10 @@ def losvasz_softmax(output, target):
 def cross_entropy_loss(output, target):
     return F.cross_entropy(output, target, ignore_index=255)
 
-
 def dice_loss(output, target):
     return dice_loss_instance(output, target)
 
-
+<<<<<<< HEAD
 def focal_loss(output, target):
     return focal_loss_instance(output, target)
     
