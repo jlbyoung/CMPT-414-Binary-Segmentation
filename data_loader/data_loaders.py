@@ -87,7 +87,13 @@ albumentations_transform = Compose([
         GridDistortion(p=0.1),
         #IAAPiecewiseAffine(p=0.3),
         ], p=0.2
-    ),
+    )
+
+    # Convert to Tensor
+    #ToTensor()
+])
+
+image_color_transformations = Compose([
 
     #Add varying levels and types of noise
     OneOf([
@@ -133,10 +139,7 @@ albumentations_transform = Compose([
     Normalize(
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225],
-    ),
-
-    # Convert to Tensor
-    #ToTensor()
+    )
 ])
 
 
@@ -151,15 +154,14 @@ def transform_pipeline(image, mask):
     # data = {"image": image, "mask": mask}
     # augmented = augmentation(**data)
 
-    aug = Compose([Resize(256,256), RandomSizedCrop(min_max_height=(224, 224),
-            height=256,
-            width=256)])
-
     augmented = albumentations_transform(image=image,mask=mask)
 
     # Extract transformed image and mask
     image = augmented['image']
     mask = augmented['mask']
+
+    img_col = image_color_transformations(image=image)
+    image = img_col['image']
 
     image = TF.to_tensor(image)
     mask = torch.from_numpy(mask).to(torch.long)
