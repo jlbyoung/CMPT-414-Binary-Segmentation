@@ -3,7 +3,7 @@
     "n_gpu": 1,
 
     "arch": {
-        "type": "FCN",
+        "type": "ENet",
         "args": {}
     },
     "data_loader": {
@@ -13,7 +13,7 @@
             "batch_size": 8,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 8
+            "num_workers": 4
         }
     },
     "optimizer": {
@@ -26,7 +26,8 @@
     },
     "loss": "cross_entropy_loss",
     "metrics": [
-        "meanIoU"
+        "meanIoU",
+        "meanDice"
     ],
     "lr_scheduler": {
         "type": "StepLR",
@@ -36,15 +37,15 @@
         }
     },
     "trainer": {
-        "epochs": 1,
+        "epochs": 5,
 
         "save_dir": "saved/",
-        "save_period": 1,
+        "save_period": 10,
         "verbosity": 2,
         
         "monitor": "min val_loss",
         "early_stop": 10,
 
-        "tensorboard": true
+        "tensorboard": false
     }
 }
