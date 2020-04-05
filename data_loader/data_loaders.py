@@ -14,47 +14,16 @@ from albumentations.pytorch import (
     ToTensorV2
 )
 
-from albumentations import (
-    PadIfNeeded,
-    IAAAdditiveGaussianNoise,
-    IAASharpen,
-    IAAEmboss,
-    IAAPiecewiseAffine,
-    GaussNoise,
-    MedianBlur,
-    MotionBlur,
-    Blur,
-    HorizontalFlip,
-    VerticalFlip,    
-    CenterCrop,    
-    Crop,
-    Compose,
-    Transpose,
-    RandomRotate90,
-    Normalize,
-    Resize,
-    ElasticTransform,
-    GridDistortion, 
-    OpticalDistortion,
-    RandomSizedCrop,
-    OneOf,
-    CLAHE,
-    RandomBrightnessContrast,
-    HueSaturationValue,  
-    RandomGamma,
-    MultiplicativeNoise,
-    ChannelDropout,
-    ChannelShuffle    
-)
+import albumentations as AB
 
-albumentations_transform = Compose([
+albumentations_transform = AB.Compose([
         
     # Note resize and crop first if scaling down to make the
     # other transformations more efficient
-    Resize(256, 256),
+    AB.Resize(256, 256),
 
     # Random crop
-    RandomSizedCrop(
+    AB.RandomSizedCrop(
         p=1,
         min_max_height=(224, 224),
         height=256,
@@ -64,27 +33,27 @@ albumentations_transform = Compose([
     #TODO: Implement ShiftScaleRotate
 
     # Image Flips
-    OneOf([
-        VerticalFlip(p=0.3),
-        HorizontalFlip(p=0.3),
-        RandomRotate90(p=0.5),
-        Transpose(p=0.4),
+    AB.OneOf([
+        AB.VerticalFlip(p=0.3),
+        AB.HorizontalFlip(p=0.3),
+        AB.RandomRotate90(p=0.5),
+        AB.Transpose(p=0.4),
         ], p=0.5
     ),
 
     # Blurring, causing isues with tensor conversion
-    OneOf([
-       MotionBlur(p=0.2),
-       MedianBlur(blur_limit=3, p=0.4),
-       Blur(blur_limit=3, p=0.2),
+    AB.OneOf([
+       AB.MotionBlur(p=0.2),
+       AB.MedianBlur(blur_limit=3, p=0.4),
+       AB.Blur(blur_limit=3, p=0.2),
        ], p=0.2
     ),
 
     # Image Warping/ Distortion
-    OneOf([
-        ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
-        OpticalDistortion(p=0.3),
-        GridDistortion(p=0.1),
+    AB.OneOf([
+        AB.ElasticTransform(p=0.5, alpha=120, sigma=120 * 0.05, alpha_affine=120 * 0.03),
+        AB.OpticalDistortion(p=0.3),
+        AB.GridDistortion(p=0.1),
         #IAAPiecewiseAffine(p=0.3),
         ], p=0.2
     )
@@ -93,50 +62,50 @@ albumentations_transform = Compose([
     #ToTensor()
 ])
 
-image_color_transformations = Compose([
+image_color_transformations = AB.Compose([
 
     #Add varying levels and types of noise
-    OneOf([
-        IAAAdditiveGaussianNoise(p=0.4),
-        GaussNoise(p=0.4),
-        MultiplicativeNoise(multiplier=0.5, p=0.2),
-        MultiplicativeNoise(multiplier=1.5, p=0.1),
-        MultiplicativeNoise(multiplier=[0.5, 1.5], per_channel=True, p=0.2),
-        MultiplicativeNoise(multiplier=[0.5, 1.5], elementwise=True, p=0.2),
-        MultiplicativeNoise(multiplier=[0.5, 1.5], elementwise=True, per_channel=True, p=0.2),
+    AB.OneOf([
+        AB.IAAAdditiveGaussianNoise(p=0.4),
+        AB.GaussNoise(p=0.4),
+        AB.MultiplicativeNoise(multiplier=0.5, p=0.2),
+        AB.MultiplicativeNoise(multiplier=1.5, p=0.1),
+        AB.MultiplicativeNoise(multiplier=[0.5, 1.5], per_channel=True, p=0.2),
+        AB.MultiplicativeNoise(multiplier=[0.5, 1.5], elementwise=True, p=0.2),
+        AB.MultiplicativeNoise(multiplier=[0.5, 1.5], elementwise=True, per_channel=True, p=0.2),
         ],p=0.3
     ),
 
 
     # Randomly Change Brightness/Sharpness/Embossment
-    OneOf([
-        CLAHE(clip_limit=2),
-        IAASharpen(),
-        IAAEmboss(),
-        RandomBrightnessContrast(),
+    AB.OneOf([
+        AB.CLAHE(clip_limit=2),
+        AB.IAASharpen(),
+        AB.IAAEmboss(),
+        AB.RandomBrightnessContrast(),
         ], p=0.4
     ),
 
     # Change Gamma and Saturation
-    HueSaturationValue(p=0.3),
-    RandomGamma(p=0.4),
+    AB.HueSaturationValue(p=0.3),
+    AB.RandomGamma(p=0.4),
 
     # Random Color Channel manipulation
-    OneOf([
-        ChannelShuffle(p=0.4),
-        ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
-        ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
-        ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
-        ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
-        ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
-        ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.2),
-        ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.2),
-        ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.2),
+    AB.OneOf([
+        AB.ChannelShuffle(p=0.4),
+        AB.ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
+        AB.ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
+        AB.ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
+        AB.ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
+        AB.ChannelDropout(channel_drop_range=(1, 1), fill_value=0, p=0.2),
+        AB.ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.2),
+        AB.ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.2),
+        AB.ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.2),
         ], p=0.2
     ),
 
     # Normalize image using values from ImageNet
-    Normalize(
+    AB.Normalize(
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225],
     )
