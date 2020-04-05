@@ -1,11 +1,13 @@
 import argparse
 import torch
 from tqdm import tqdm
+from utils import tensor_to_image
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
 from parse_config import ConfigParser
+from PIL import Image
 
 
 def main(config):
@@ -44,15 +46,25 @@ def main(config):
     total_loss = 0.0
     total_metrics = torch.zeros(len(metric_fns))
 
+    MAX_IMAGES = 20
+    current = 0
     with torch.no_grad():
         for i, (data, target) in enumerate(tqdm(data_loader)):
             data, target = data.to(device), target.to(device)
             output = model(data)
+            
+            for i in range(data.shape[0]):
+                if current <= MAX_IMAGES:
+                    current += 1
 
-            #
-            # save sample images, or do something with output here
-            #
+                    pred = torch.sigmoid(output.squeeze(dim=1)[i, :, :]) > 0.5
+                    pred = tensor_to_image(pred)
+                    
+                    true = tensor_to_image(target[i, :, :])
 
+                    pred.save(f'images/{current}-pred.png')
+                    true.save(f'images/{current}-true.png')
+            
             # computing loss, metrics on test set
             loss = loss_fn(output, target)
             batch_size = data.shape[0]

@@ -1,9 +1,16 @@
 import json
+import PIL
+import torch
 import pandas as pd
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
 
+
+def tensor_to_image(arr):
+    image = (arr.to(torch.uint8) * 255).cpu().numpy()
+    image = PIL.Image.fromarray(image, 'L')
+    return image
 
 def ensure_dir(dirname):
     dirname = Path(dirname)

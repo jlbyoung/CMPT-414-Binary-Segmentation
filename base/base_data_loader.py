@@ -58,4 +58,5 @@ class BaseDataLoader(DataLoader):
         if self.valid_sampler is None:
             return None
         else:
+            self.init_kwargs['dataset'] = self.init_kwargs['dataset'].val()
             return DataLoader(sampler=self.valid_sampler, **self.init_kwargs)
