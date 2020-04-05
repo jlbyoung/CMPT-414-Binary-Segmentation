@@ -10,10 +10,11 @@ dependencies:
   - pandas=1.0.1
   - pillow=7.0.0
   - tqdm=4.43.0
-# Install these manually as the installation is system specific
-# - pytorch=1.4.0
-# - torchvision=0.5.0
   - jupyterlab=2.0.1
   - tensorboard=1.15.0
   - ipywidgets=7.5.1
   - albumentations=0.4.5
+  
+# Install these manually as the installation is system specific
+# - pytorch=1.4.0
+# - torchvision=0.5.0
