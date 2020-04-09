@@ -9,7 +9,7 @@ git config --global user.email ""
 git config --global user.name ""
 
 
-git checkout master # Replace with your branch here
+git checkout add-binary-classification # Replace with your branch here
 
 
 #install packages
