@@ -20,6 +20,6 @@ conda install --name cv414 pytorch torchvision cudatoolkit=10.1 -c pytorchxw
 chmod +x download_dataset.sh
 ./download_dataset.sh
 
-mv imagesets/*.txt data/VOCdevkit/VOC2012/ImageSets/
+cp imagesets/*.txt data/VOCdevkit/VOC2012/ImageSets/Segmentation
 # We can add all the commands we want to run here
 # python train.py -c collabConfig.json
