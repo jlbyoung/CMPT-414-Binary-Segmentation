@@ -1,6 +1,6 @@
 # Sometimes the notebook may run into random issues, if that happens just run it again
 
- Setup repository
+# Setup repository
 git clone https://github.com/jlbyoung/CMPT-414-Rotoscoping.git
 cd CMPT-414-Rotoscoping
 
