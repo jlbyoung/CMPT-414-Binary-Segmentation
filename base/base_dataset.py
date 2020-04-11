@@ -1,11 +1,12 @@
 from torch.utils.data import Dataset
 
 class BaseDataSet(Dataset):
-    def __init__(self, root, split, transforms):
+    def __init__(self, root, split, transforms, val_transforms=None):
         self.root = root
         self.split = split
         self.files = []
         self.transforms = transforms
+        self.val_transforms = val_transforms
         self._set_files()
 
     def _set_files(self):
@@ -27,3 +28,8 @@ class BaseDataSet(Dataset):
         fmt_str += "    Split: {}\n".format(self.split)
         fmt_str += "    Root: {}".format(self.root)
         return fmt_str
+    
+    def val(self):
+        return self.__class__(root=self.root, split=self.split, 
+                              transforms=self.val_transforms, 
+                              val_transforms=None)

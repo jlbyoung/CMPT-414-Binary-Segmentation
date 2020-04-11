@@ -25,12 +25,13 @@ albumentations_transform = AB.Compose([
     # Random crop
     AB.RandomSizedCrop(
         p=1,
-        min_max_height=(224, 224),
+        min_max_height=(200, 224),
         height=256,
         width=256
     ),
 
-    #TODO: Implement ShiftScaleRotate
+    # ShiftScaleRotate
+    AB.ShiftScaleRotate(p=0.5),
 
     # Image Flips
     AB.OneOf([
@@ -73,7 +74,7 @@ image_color_transformations = AB.Compose([
         AB.MultiplicativeNoise(multiplier=[0.5, 1.5], per_channel=True, p=0.5),
         AB.MultiplicativeNoise(multiplier=[0.5, 1.5], elementwise=True, p=0.5),
         AB.MultiplicativeNoise(multiplier=[0.5, 1.5], elementwise=True, per_channel=True, p=0.5),
-        ],p=0.5
+        ],p=0.2
     ),
 
 
@@ -83,12 +84,12 @@ image_color_transformations = AB.Compose([
         AB.IAASharpen(),
         AB.IAAEmboss(),
         AB.RandomBrightnessContrast(),
-        ], p=0.5
+        ], p=0.2
     ),
 
     # Change Gamma and Saturation
-    AB.HueSaturationValue(p=0.5),
-    AB.RandomGamma(p=0.5),
+    AB.HueSaturationValue(p=0.2),
+    AB.RandomGamma(p=0.2),
 
     # Random Color Channel manipulation
     AB.OneOf([
@@ -101,7 +102,7 @@ image_color_transformations = AB.Compose([
         AB.ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.5),
         AB.ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.5),
         AB.ChannelDropout(channel_drop_range=(2, 2), fill_value=0, p=0.5),
-        ], p=0.5
+        ], p=0.2
     ),
 
     # Normalize image using values from ImageNet
@@ -173,11 +174,11 @@ class VOCDataset(BaseDataSet):
         super(VOCDataset, self).__init__(**kwargs)
 
     def _set_files(self):
-        self.root = os.path.join(self.root, 'VOCdevkit/VOC2012')
-        self.image_dir = os.path.join(self.root, 'JPEGImages')
-        self.label_dir = os.path.join(self.root, 'SegmentationClass')
+        self.base = os.path.join(self.root, 'VOCdevkit/VOC2012')
+        self.image_dir = os.path.join(self.base, 'JPEGImages')
+        self.label_dir = os.path.join(self.base, 'SegmentationClass')
 
-        file_list = os.path.join(self.root, "ImageSets/Segmentation", self.split + ".txt")
+        file_list = os.path.join(self.base, "ImageSets/Segmentation", self.split + ".txt")
         self.files = [line.rstrip() for line in tuple(open(file_list, "r"))]
     
     def _load_data(self, index):
@@ -197,9 +198,10 @@ class VOCDataLoader(BaseDataLoader):
 
         train_pipeline = lambda im, target: transform_pipeline(im, target)
         valid_pipeline = lambda im, target: transform_pipeline(im, target, training=False)
-        pipeline = train_pipeline if training else valid_pipeline
 
         image_set = 'person_train' if training else 'person_val'
         self.data_dir = data_dir
-        self.dataset = VOCDataset(root=self.data_dir, split=image_set, transforms=pipeline)
+        self.dataset = VOCDataset(root=self.data_dir, split=image_set, 
+                                  transforms=train_pipeline if training else valid_pipeline,
+                                  val_transforms=valid_pipeline)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
