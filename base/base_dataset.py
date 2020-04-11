@@ -1,4 +1,4 @@
-rom torch.utils.data import Dataset
+from torch.utils.data import Dataset
 
 class BaseDataSet(Dataset):
     def __init__(self, root, split, transforms, val_transforms=None):
