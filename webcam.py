@@ -15,47 +15,13 @@ from torchvision import models
 import torchvision.transforms as T
 import model.model as module_arch
 from parse_config import ConfigParser
+import os.path
 
 
-def decode_segmap(image, nc=21):
-  
-  label_colors = np.array([(0, 0, 0),  # 0=background
-               # 1=aeroplane, 2=bicycle, 3=bird, 4=boat, 5=bottle
-               (128, 0, 0), (0, 128, 0), (128, 128, 0), (0, 0, 128), (128, 0, 128),
-               # 6=bus, 7=car, 8=cat, 9=chair, 10=cow
-               (0, 128, 128), (128, 128, 128), (64, 0, 0), (192, 0, 0), (64, 128, 0),
-               # 11=dining table, 12=dog, 13=horse, 14=motorbike, 15=person
-               (192, 128, 0), (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128),
-               # 16=potted plant, 17=sheep, 18=sofa, 19=train, 20=tv/monitor
-               (0, 64, 0), (128, 64, 0), (0, 192, 0), (128, 192, 0), (0, 64, 128)])
 
-  r = np.zeros_like(image).astype(np.uint8)
-  g = np.zeros_like(image).astype(np.uint8)
-  b = np.zeros_like(image).astype(np.uint8)
-  
-  for l in range(0, nc):
-    idx = image == l
-    r[idx] = label_colors[l, 0]
-    g[idx] = label_colors[l, 1]
-    b[idx] = label_colors[l, 2]
-    
-  rgb = np.stack([r, g, b], axis=2)
-  return rgb
-
-def segment(net, img):
-    trf = T.Compose([T.Resize(256),
-               T.CenterCrop(224),
-               T.ToTensor(),
-               T.Normalize(mean = [0.485, 0.456, 0.406],
-                           std = [0.229, 0.224, 0.225])])
-    inp = trf(img).unsqueeze(0)
-    out = net(inp)['out']
-    om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
-    rgb = decode_segmap(om)
-    return rgb
 
 class VideoRecorder:
-    def __init__(self, model):
+    def __init__(self, model, device):
         self.cap = cv2.VideoCapture(0)
         
         self.list = []
@@ -72,9 +38,6 @@ class VideoRecorder:
         self.lmain = tk.Label(self.app)
         self.lmain.grid(row=0, column=0)
         
-        self.lmain2 = tk.Label(self.app)
-        self.lmain2.grid(row=0, column=1)
-        
         #button to save video
         self.but = tk.Button(text="Save Session As Video And Exit", command = self.saveVideo)
         self.but.grid(row = 1, column = 0)
@@ -86,7 +49,7 @@ class VideoRecorder:
         # Define the codec and create VideoWriter object.The output is stored in 'outpy.avi' file.
         self.out = cv2.VideoWriter('outpy.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 10, (self.frame_width,self.frame_height))
         
-        
+        self.device = device
         #model
         self.model = model.eval()
         #pretrained 
@@ -95,7 +58,38 @@ class VideoRecorder:
         self.video_stream()
         self.root.mainloop()
         
-
+    def decode_segmap(self, image, nc=2):
+      
+      label_colors = np.array([(0, 0, 0),  # 0=background
+                               (1, 1, 1)])
+    
+      r = np.zeros_like(image).astype(np.uint8)
+      g = np.zeros_like(image).astype(np.uint8)
+      b = np.zeros_like(image).astype(np.uint8)
+      
+      for l in range(0, nc):
+        idx = image == l
+        r[idx] = label_colors[l, 0]
+        g[idx] = label_colors[l, 1]
+        b[idx] = label_colors[l, 2]
+        
+      rgb = np.stack([r, g, b], axis=2)
+      return rgb
+    
+    def segment(self, net, img):
+        trf = T.Compose([
+                   T.ToTensor(),
+                   T.Normalize(mean = [0.485, 0.456, 0.406],
+                               std = [0.229, 0.224, 0.225])])
+        inp = trf(img).unsqueeze(0)
+        inp = inp.to(self.device)
+        out = net(inp)
+        pre = torch.sigmoid(out)
+        pre = (pre>0.5).float()
+        pre = np.uint8(pre)
+        om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
+        rgb = self.decode_segmap(om)
+        return rgb
     
     def saveVideo(self):
         print("Saving Video")
@@ -136,6 +130,8 @@ class VideoRecorder:
         cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         #draw rectangle
         cv2image = self.modifyFrame(cv2image, transforms)
+        print(type(cv2image))
+        print(cv2image.shape)
         
         #list for saving video
         #self.list.append(cv2image)
@@ -144,13 +140,14 @@ class VideoRecorder:
         img = Image.fromarray(np.uint8(cv2image))
         
         #segments the image using fcn
-        segment_img = segment(self.model, img)
-        print(type(self.model))
+        segment_img = self.segment(self.model, img)
         
         
         
         #must resize the img so that we can save video
-        segment_img = cv2.resize(segment_img, (self.frame_width, self.frame_height))
+        segment_img = cv2.resize(segment_img, (self.frame_width,self.frame_height))
+        segment_img = Image.fromarray(segment_img, 'RGB')
+        
         #display images side by side, cv2image is real time image, and segment_img is semantic segementation
         stacked = np.hstack((cv2image, segment_img))
         
@@ -181,16 +178,12 @@ if __name__ == '__main__':
     
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
     
-    print(config.resume)
-    checkpoint = torch.load("model_best.pth")
+    checkpoint = torch.load(os.path.basename("C:/Users/james/Downloads/CMPT-414-R/CMPT-414-Rotoscoping/checkpoint-epoch1.pth"))
     
-    state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
-    model.load_state_dict(state_dict)
-
-    # prepare model for testing
+    print(torch.cuda.is_available())
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     
-    video = VideoRecorder(model)
+    video = VideoRecorder(model, device)
