@@ -81,10 +81,10 @@ class VideoRecorder:
                    T.ToTensor(),
                    T.Normalize(mean = [0.485, 0.456, 0.406],
                                std = [0.229, 0.224, 0.225])])
-        inp = trf(img).unsqueeze(0)
+        inp = trf(img)
         inp = inp.to(self.device)
         out = net(inp)
-        out = torch.sigmoid(out)
+        out = torch.sigmoid(out.squeeze())
         out = (pre > 0.5).to(torch.uint8).cpu().numpy()
         rgb = self.decode_segmap(out)
         return rgb
