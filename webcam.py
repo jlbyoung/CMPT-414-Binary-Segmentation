@@ -78,14 +78,14 @@ class VideoRecorder:
     
     def segment(self, net, img):
         trf = T.Compose([
-                   T.Resize(256),
+                   #T.Resize(256),
                    T.ToTensor(),
                    T.Normalize(mean = [0.485, 0.456, 0.406],
                                std = [0.229, 0.224, 0.225])])
         inp = trf(img).unsqueeze(0)
         inp = inp.to(self.device)
         out = net(inp)
-        out = T.Resize(480)(out)
+        #out = T.Resize(480)(out)
         out = torch.sigmoid(out.squeeze())
         out = (out > 0.5).to(torch.uint8).cpu().numpy()
         rgb = self.decode_segmap(out)
@@ -119,7 +119,7 @@ class VideoRecorder:
         end_pos = (500, 400)
         color = (255, 0, 0)
         line_width = 3
-        cv2.rectangle(img, start_pos, end_pos, color, line_width)
+        #cv2.rectangle(img, start_pos, end_pos, color, line_width)
         return img
     
     # function for video streaming
