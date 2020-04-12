@@ -78,15 +78,18 @@ class VideoRecorder:
     
     def segment(self, net, img):
         trf = T.Compose([
+                   T.Resize(256),
                    T.ToTensor(),
                    T.Normalize(mean = [0.485, 0.456, 0.406],
                                std = [0.229, 0.224, 0.225])])
         inp = trf(img).unsqueeze(0)
         inp = inp.to(self.device)
         out = net(inp)
+        out = T.Resize(480)(out)
         out = torch.sigmoid(out.squeeze())
         out = (out > 0.5).to(torch.uint8).cpu().numpy()
         rgb = self.decode_segmap(out)
+
         return rgb
     
     def saveVideo(self):
@@ -182,6 +185,9 @@ if __name__ == '__main__':
         model = torch.nn.DataParallel(model)
     print(torch.cuda.is_available())
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    state_dict = checkpoint['state_dict']
+    model.load_state_dict(state_dict)
     model = model.to(device)
+
     
     video = VideoRecorder(model, device)
