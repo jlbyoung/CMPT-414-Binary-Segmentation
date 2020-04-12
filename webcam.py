@@ -85,7 +85,7 @@ class VideoRecorder:
         inp = inp.to(self.device)
         out = net(inp)
         out = torch.sigmoid(out.squeeze())
-        out = (pre > 0.5).to(torch.uint8).cpu().numpy()
+        out = (out > 0.5).to(torch.uint8).cpu().numpy()
         rgb = self.decode_segmap(out)
         return rgb
     
