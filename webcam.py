@@ -15,7 +15,6 @@ from torchvision import models
 import torchvision.transforms as T
 import model.model as module_arch
 from parse_config import ConfigParser
-import os.path
 
 
 def decode_segmap(image, nc=21):
@@ -50,7 +49,7 @@ def segment(net, img):
                T.Normalize(mean = [0.485, 0.456, 0.406],
                            std = [0.229, 0.224, 0.225])])
     inp = trf(img).unsqueeze(0)
-    out = net(inp)
+    out = net(inp)['out']
     om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
     rgb = decode_segmap(om)
     return rgb
@@ -182,11 +181,15 @@ if __name__ == '__main__':
     
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
     
-    checkpoint = torch.load(os.path.basename("C:/Users/james/Downloads/CMPT-414-R/CMPT-414-Rotoscoping/checkpoint-epoch1.pth"))
+    print(config.resume)
+    checkpoint = torch.load("model_best.pth")
     
+    state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
-    print(torch.cuda.is_available())
+    model.load_state_dict(state_dict)
+
+    # prepare model for testing
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     
