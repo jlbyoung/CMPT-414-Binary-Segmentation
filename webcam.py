@@ -61,7 +61,7 @@ class VideoRecorder:
     def decode_segmap(self, image, nc=2):
       
       label_colors = np.array([(0, 0, 0),  # 0=background
-                               (1, 1, 1)])
+                               (255, 255, 255)]) # 1=Person
     
       r = np.zeros_like(image).astype(np.uint8)
       g = np.zeros_like(image).astype(np.uint8)
@@ -84,11 +84,9 @@ class VideoRecorder:
         inp = trf(img).unsqueeze(0)
         inp = inp.to(self.device)
         out = net(inp)
-        pre = torch.sigmoid(out)
-        pre = (pre>0.5).float()
-        pre = np.uint8(pre)
-        om = torch.argmax(out.squeeze(), dim=0).detach().cpu().numpy()
-        rgb = self.decode_segmap(om)
+        out = torch.sigmoid(out)
+        out = (pre > 0.5).to(torch.uint8).cpu().numpy()
+        rgb = self.decode_segmap(out)
         return rgb
     
     def saveVideo(self):
