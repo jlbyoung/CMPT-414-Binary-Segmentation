@@ -110,3 +110,17 @@ datasets/
 .vscode/
 .idea/
 __MACOSX/
+
+.bash_history
+.bash_logout
+.bashrc
+.conda/
+.config/
+.docker/
+.gitconfig
+.ipython/
+.jupyter/
+.local/
+.profile
+.viminfo
+images
