@@ -32,8 +32,4 @@ class BaseDataSet(Dataset):
     def val(self):
         return self.__class__(root=self.root, split=self.split, 
                               transforms=self.val_transforms, 
-<<<<<<< HEAD
                               val_transforms=None)
-=======
-                              val_transforms=None)
->>>>>>> 68bd97f826d5862bc77be3dbf8f370c1f1f35b87
