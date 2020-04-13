@@ -179,7 +179,7 @@ if __name__ == '__main__':
     
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
     
-    checkpoint = torch.load(os.path.basename("checkpoint-epoch116.pth"))
+    checkpoint = torch.load(os.path.basename("model_best.pth"))
     
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
