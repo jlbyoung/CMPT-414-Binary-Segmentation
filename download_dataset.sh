@@ -7,10 +7,14 @@ mkdir data
 # unzip -qq data/SegmentationClassAug.zip -d data
 # rm data/*.zip
 
-curl http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar --output data/voc.tar --silent
+echo "Downloading PASCAL VOC 2012 dataset ..."
+curl http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar --output data/voc.tar
+echo "Downloading (Done)"
 
+echo "Extracting files from the dataset tar file ..."
 tar -xf data/voc.tar -C data
 rm data/voc.tar
+echo "Extracting (Done)"
 
 # mv data/SegmentationClassAug data/VOCdevkit/VOC2012/SegmentationClassAug
 # mv data/*.txt  data/VOCdevkit/VOC2012/ImageSets/Segmentation/
