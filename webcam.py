@@ -47,7 +47,8 @@ class VideoRecorder:
         self.frame_height = int(self.cap.get(4))
 
         # Define the codec and create VideoWriter object.The output is stored in 'outpy.avi' file.
-        self.out = cv2.VideoWriter('outpy.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 10, (self.frame_width,self.frame_height))
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        self.out = cv2.VideoWriter('output.avi',fourcc, 20, (self.frame_width*2,self.frame_height))
         
         self.device = device
         #model
@@ -96,13 +97,13 @@ class VideoRecorder:
         print("Saving Video")
         #fcn = models.segmentation.fcn_resnet101(pretrained=1).eval()
         for i in self.list:
-            """
-            i = cv2.cvtColor(i, cv2.COLOR_BGR2RGB)
             
-            i = Image.fromarray(np.uint8(i))
-            i = segment(fcn, i)
-            """
-            i = cv2.resize(i, (self.frame_width, self.frame_height))
+            #i = cv2.cvtColor(i, cv2.COLOR_BGR2RGB)
+
+            #i = Image.fromarray(np.uint8(i))
+            #i = segment(fcn, i)
+
+            #i = cv2.resize(i, (self.frame_width, self.frame_height))
             
             self.out.write(i)
         
@@ -119,7 +120,7 @@ class VideoRecorder:
         end_pos = (500, 400)
         color = (255, 0, 0)
         line_width = 3
-        #cv2.rectangle(img, start_pos, end_pos, color, line_width)
+        cv2.rectangle(img, start_pos, end_pos, color, line_width)
         return img
     
     # function for video streaming
@@ -130,12 +131,11 @@ class VideoRecorder:
         #webcam image is BGR, convert to RGB
         cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         #draw rectangle
-        cv2image = self.modifyFrame(cv2image, transforms)
+        #cv2image = self.modifyFrame(cv2image, transforms)
         print(type(cv2image))
         print(cv2image.shape)
         
-        #list for saving video
-        #self.list.append(cv2image)
+
         
         #since cv2 is np array, convert to PIL so that tkinter can display
         img = Image.fromarray(np.uint8(cv2image))
@@ -151,7 +151,10 @@ class VideoRecorder:
         
         #display images side by side, cv2image is real time image, and segment_img is semantic segementation
         stacked = np.hstack((cv2image, segment_img))
-        
+
+        #list for saving video
+        self.list.append(stacked)        
+
         #convert to PIL
         stacked = Image.fromarray(np.uint8(stacked))
         imgtk = ImageTk.PhotoImage(image=stacked)
@@ -159,7 +162,7 @@ class VideoRecorder:
         self.lmain.configure(image=imgtk)
         
         #pause is the amount of time before next webcam capture is display, change to 1 for smoothest
-        pause = 5
+        pause = 1
         self.lmain.after(pause, self.video_stream) 
 
 
