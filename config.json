@@ -44,7 +44,7 @@
         "save_period": 10,
         "verbosity": 1,
         
-        "monitor": "min val_binary_iou",
+        "monitor": "max val_binary_iou",
         "early_stop": 25,
 
         "tensorboard": true
