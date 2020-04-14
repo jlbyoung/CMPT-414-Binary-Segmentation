@@ -21,8 +21,8 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.0005,
-            "weight_decay": 0.0002,
+            "lr": 5e-4,
+            "weight_decay": 2e-4,
             "amsgrad": true
         }
     },
@@ -33,20 +33,20 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 25,
+            "step_size": 40,
             "gamma": 0.1
         }
     },
     "trainer": {
-        "epochs": 500,
+        "epochs": 50,
 
         "save_dir": "saved/",
-        "save_period": 20,
+        "save_period": 10,
         "verbosity": 1,
         
         "monitor": "min val_binary_iou",
-        "early_stop": 50,
+        "early_stop": 25,
 
-        "tensorboard": false
+        "tensorboard": true
     }
 }
