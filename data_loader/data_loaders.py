@@ -190,18 +190,19 @@ class VOCDataset(BaseDataSet):
         # image_id = self.files[index].split("/")[-1].split(".")[0]
         return image, label
       
+
+def valid_pipeline(im, target):
+    return transform_pipeline(im, target, training=False)
+
+
 class VOCDataLoader(BaseDataLoader):
     """
     Pascal VOC data loader
     """
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
-
-        train_pipeline = lambda im, target: transform_pipeline(im, target)
-        valid_pipeline = lambda im, target: transform_pipeline(im, target, training=False)
-
         image_set = 'person_train' if training else 'person_val'
         self.data_dir = data_dir
         self.dataset = VOCDataset(root=self.data_dir, split=image_set, 
-                                  transforms=train_pipeline if training else valid_pipeline,
+                                  transforms=transform_pipeline if training else valid_pipeline,
                                   val_transforms=valid_pipeline)
         super().__init__(self.dataset, batch_size, shuffle, validation_split, num_workers)
