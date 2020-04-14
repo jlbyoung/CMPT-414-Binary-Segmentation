@@ -172,8 +172,8 @@ if __name__ == '__main__':
                       help='config file path (default: config.json)')
     args.add_argument('-r', '--resume', default=None, type=str,
                       help='path to latest checkpoint (default: None)')
-    args.add_argument('-m', '--model', default=None, type=str,
-                      help='path to model file (default: None)')
+    args.add_argument('-m', '--model', default='model_best.pth', type=str,
+                      help='path to model file (default: model_best.pth)')
     args.add_argument('-d', '--device', default=None, type=str,
                       help='indices of GPUs to enable (default: all)')
     
