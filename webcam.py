@@ -17,6 +17,7 @@ import model.model as module_arch
 from parse_config import ConfigParser
 import os.path
 
+from model.model import ENet
 
 
 
@@ -53,57 +54,38 @@ class VideoRecorder:
         self.device = device
         #model
         self.model = model.eval()
-        #pretrained 
-        #self.model = models.segmentation.fcn_resnet101(pretrained=1).eval()
         
         self.video_stream()
         self.root.mainloop()
         
     def decode_segmap(self, image, nc=2):
       
-      label_colors = np.array([(0, 0, 0),  # 0=background
-                               (255, 255, 255)]) # 1=Person
-    
-      r = np.zeros_like(image).astype(np.uint8)
-      g = np.zeros_like(image).astype(np.uint8)
-      b = np.zeros_like(image).astype(np.uint8)
-      
-      for l in range(0, nc):
-        idx = image == l
-        r[idx] = label_colors[l, 0]
-        g[idx] = label_colors[l, 1]
-        b[idx] = label_colors[l, 2]
+      image = image * 255
         
-      rgb = np.stack([r, g, b], axis=2)
+      rgb = np.stack([image, image, image], axis=2)
       return rgb
     
     def segment(self, net, img):
         trf = T.Compose([
-                   #T.Resize(256),
+            
                    T.ToTensor(),
                    T.Normalize(mean = [0.485, 0.456, 0.406],
                                std = [0.229, 0.224, 0.225])])
         inp = trf(img).unsqueeze(0)
         inp = inp.to(self.device)
         out = net(inp)
-        #out = T.Resize(480)(out)
+
         out = torch.sigmoid(out.squeeze())
-        out = (out > 0.5).to(torch.uint8).cpu().numpy()
+        out = (out > 0.6).to(torch.uint8).cpu().numpy()
         rgb = self.decode_segmap(out)
 
         return rgb
     
     def saveVideo(self):
         print("Saving Video")
-        #fcn = models.segmentation.fcn_resnet101(pretrained=1).eval()
         for i in self.list:
             
-            #i = cv2.cvtColor(i, cv2.COLOR_BGR2RGB)
-
-            #i = Image.fromarray(np.uint8(i))
-            #i = segment(fcn, i)
-
-            #i = cv2.resize(i, (self.frame_width, self.frame_height))
+            i = cv2.cvtColor(i, cv2.COLOR_BGR2RGB)
             
             self.out.write(i)
         
@@ -112,17 +94,7 @@ class VideoRecorder:
         self.cap.release()
         print("cap")
         self.root.destroy()
-        
-    #note: might not need transforms variable
-    #draw rectangle
-    def modifyFrame(self, img, transforms):
-        start_pos = (200, 100)
-        end_pos = (500, 400)
-        color = (255, 0, 0)
-        line_width = 3
-        cv2.rectangle(img, start_pos, end_pos, color, line_width)
-        return img
-    
+          
     # function for video streaming
     #note: might not need transforms variable
     def video_stream(self, transforms = 0):
@@ -130,8 +102,7 @@ class VideoRecorder:
         _, frame = self.cap.read()
         #webcam image is BGR, convert to RGB
         cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        #draw rectangle
-        #cv2image = self.modifyFrame(cv2image, transforms)
+
         print(type(cv2image))
         print(cv2image.shape)
         
@@ -150,6 +121,7 @@ class VideoRecorder:
         segment_img = Image.fromarray(segment_img, 'RGB')
         
         #display images side by side, cv2image is real time image, and segment_img is semantic segementation
+
         stacked = np.hstack((cv2image, segment_img))
 
         #list for saving video
@@ -167,33 +139,20 @@ class VideoRecorder:
 
 
 if __name__ == '__main__':
-    args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default='config.json', type=str,
-                      help='config file path (default: config.json)')
-    args.add_argument('-r', '--resume', default=None, type=str,
-                      help='path to latest checkpoint (default: None)')
+    args = argparse.ArgumentParser(description='Preview model using your webcam')
     args.add_argument('-m', '--model', default='model_best.pth', type=str,
                       help='path to model file (default: model_best.pth)')
-    args.add_argument('-d', '--device', default=None, type=str,
-                      help='indices of GPUs to enable (default: all)')
     
     parsed = args.parse_args()
-    config = ConfigParser.from_args(args)
-    logger = config.get_logger('test')
-    model = config.init_obj('arch', module_arch)
-    logger.info(model)
+    model = ENet(num_classes=1)
+    print('Loading model: {} ...'.format(parsed.model))
     
-    logger.info('Loading checkpoint: {} ...'.format(config.resume))
-    
-    checkpoint = torch.load(parsed.model)
-    
-    if config['n_gpu'] > 1:
-        model = torch.nn.DataParallel(model)
-    print(torch.cuda.is_available())
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    state_dict = checkpoint['state_dict']
-    model.load_state_dict(state_dict)
-    model = model.to(device)
+    state_dict = torch.load(parsed.model)['state_dict']
 
-    
-    video = VideoRecorder(model, device)
+    if torch.cuda.is_available():
+        device = torch.device('cuda')
+        model.load_state_dict(state_dict)
+        model = model.to(device)
+        video = VideoRecorder(model, device)
+    else:
+        print('NVIDIA GPU not found, aborting script.')
